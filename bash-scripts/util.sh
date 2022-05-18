@@ -142,8 +142,98 @@ function local_directory_exists() {
 # ======================================================================================================================
 # Git operations
 # ----------------------------------------------------------------------------------------------------------------------
+# Check if a branch exists remotely or not
+# Note: Assumed to already be inside the repository folder
+# Globals:
+#   None
+# Arguments:
+#   [1] (string) remote branch name
+# Outputs:
+#   0 - remote branch exists
+#   1 - remote branch does not exist
+
+function remote_branch_exists_internal() {
+  local ALLB
+  ALLB=$(git branch -r)
+
+  [ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ] && return 1
+
+  return 0
+}
+# ----------------------------------------------------------------------------------------------------------------------
+# Check if a branch exists remotely or not
+# Note: Assumed to be outside the repository folder
+# Globals:
+#   None
+# Arguments:
+#   [1] (string) remote branch name
+#   [1] (string) repository folder path
+# Outputs:
+#   0 - remote branch exists
+#   1 - remote branch does not exist
+
+function remote_branch_exists_external() {
+  cd "${2}" || exit
+
+  local ALLB
+  ALLB=$(git branch -r)
+
+  if [[ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ]]; then
+    cd .. || exit
+    return 1
+  else
+    cd .. || exit
+    return 0
+  fi
+}
+# ----------------------------------------------------------------------------------------------------------------------
 # Check if a branch exists locally or not
-# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
+# Note: Assumed to already be inside the repository folder
+# Globals:
+#   None
+# Arguments:
+#   [1] (string) local branch name
+# Outputs:
+#   0 - local branch exists
+#   1 - local branch does not exist
+
+function local_branch_exists_internal() {
+  local ALLB
+  ALLB=$(git branch -r)
+
+  [ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ] && return 1
+
+  return 0
+}
+# ----------------------------------------------------------------------------------------------------------------------
+# Check if a branch exists locally or not
+# Note: Assumed to be outside the repository folder
+# Globals:
+#   None
+# Arguments:
+#   [1] (string) local branch name
+#   [1] (string) repository folder path
+# Outputs:
+#   0 - local branch exists
+#   1 - local branch does not exist
+
+function local_branch_exists_external() {
+  cd "${2}" || exit
+
+  local ALLB
+  ALLB=$(git branch -r)
+
+  if [[ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ]]; then
+    cd .. || exit
+    return 1
+  else
+    cd .. || exit
+    return 0
+  fi
+}
+# ----------------------------------------------------------------------------------------------------------------------
+# Check if a branch exists locally or not
+# Note: If no folder path [2] is passed in, it is assumed you are already in the repository folder
 # Globals:
 #   None
 # Arguments:
@@ -155,10 +245,29 @@ function local_directory_exists() {
 #   1 - local branch does not exist
 
 function remote_branch_exists() {
-  
+  if [[ ! -n "${1}" ]]; then  # variable does not exist
+    export varReg="n"
+  else  # variable does exist
+    export varReg="y"
+  fi
+
+  # Check if the repository folder path was passed as an argument
+  if [[ -n "${2}" ]]; then
+    cd "${2}" || exit
+  fi
 
   local ALLB
   ALLB=$(git branch -r)
+
+  if [[ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ]]; then
+    if [[ -n "${2}" ]]; then
+      :
+    fi
+  else
+    if [[ -n "${2}" ]]; then
+      :
+    fi
+  fi
 
   [ ! "$(echo "${ALLB}" | grep -o -c -w origin/"${1}")" -ge 1 ] && return 1
 
@@ -166,7 +275,7 @@ function remote_branch_exists() {
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if a branch exists locally or not
-# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
+# Note: If no folder path [2] is passed in, it is assumed you are already in the repository folder
 # Globals:
 #   None
 # Arguments:
@@ -186,7 +295,7 @@ function local_branch_exists() {
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if a tag exists
-# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
+# Note: If no folder path [2] is passed in, it is assumed you are already in the repository folder
 # Globals:
 #   None
 # Arguments:
@@ -208,7 +317,7 @@ function check_tag_exists() {
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if there are any differences in between the remote
 # version in the current repository
-# Note: If no folder path is passed in, it is assumed you are already in the repository folder [1]
+# Note: If no folder path [1] is passed in, it is assumed you are already in the repository folder
 # Globals:
 #   None
 # Arguments:
