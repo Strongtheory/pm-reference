@@ -143,16 +143,20 @@ function local_directory_exists() {
 # Git operations
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if a branch exists locally or not
+# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
 # Globals:
 #   None
 # Arguments:
 #   None
 #   [1] (string) local branch name
+#   [2] (string) repository folder path referenced from the current location (optional)
 # Outputs:
 #   0 - local branch exists
 #   1 - local branch does not exist
 
 function remote_branch_exists() {
+  
+
   local ALLB
   ALLB=$(git branch -r)
 
@@ -162,10 +166,12 @@ function remote_branch_exists() {
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if a branch exists locally or not
+# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
 # Globals:
 #   None
 # Arguments:
 #   [1] (string) local branch name
+#   [2] (string) repository folder path referenced from the current location (optional)
 # Outputs:
 #   0 - local branch exists
 #   1 - local branch does not exist
@@ -180,6 +186,7 @@ function local_branch_exists() {
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # Check if a tag exists
+# Note: If no folder path is passed in, it is assumed you are already in the repository folder [2]
 # Globals:
 #   None
 # Arguments:
@@ -199,7 +206,25 @@ function check_tag_exists() {
   fi
 }
 # ----------------------------------------------------------------------------------------------------------------------
+# Check if there are any differences in between the remote
+# version in the current repository
+# Note: If no folder path is passed in, it is assumed you are already in the repository folder [1]
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - repository does not have any local changes
+#   1 - repository does have local changes
 
+function check_if_repo_difference_exists() {
+  local check
+  check=$(git status --porcelain | wc -l)
+
+  [[ "${check}" -ne 0 ]] && return 1
+
+  return 0
+}
 # ----------------------------------------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------------------------------------
