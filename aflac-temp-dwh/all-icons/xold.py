@@ -52,9 +52,11 @@ def display_icons(class_list):
     if len(class_list) == 1:
         return class_list[0][1](class_list[0][0])
     length = len(class_list)
-    return display_icons(class_list[:-1]) - class_list[length - 1][1](
-        class_list[length - 1][0]
-    )
+    # return display_icons(class_list[:-1]) - class_list[length - 1][1](
+    #     class_list[length - 1][0]
+    # )
+
+    return display_icons(class_list[:-1])
 
 
 if __name__ == "__main__":

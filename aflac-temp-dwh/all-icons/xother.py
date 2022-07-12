@@ -64,33 +64,60 @@ def get_provider_classes(providers, provider):
     return providers[provider]
 
 
-def display_icons(class_list):
+def display_icons_horizontal(class_list):
     if len(class_list) < 1:
         return
     if len(class_list) == 1:
         return class_list[0][1](class_list[0][0])
     length = len(class_list)
     return (
-        display_icons(class_list[:-1])
+        display_icons_horizontal(class_list[:-1])
         - Edge(penwidth="0", minlen="2")
         - class_list[length - 1][1](class_list[length - 1][0])
     )
 
 
-def print_image(provider, pclassName):
+def display_icons_vertical(class_list):
+    if len(class_list) < 1:
+        return
+    if len(class_list) == 1:
+        return class_list[0][1](class_list[0][0])
+
+    return display_icons_vertical(class_list[:-1])
+
+
+def print_image_horizontal(provider, pclassName):
     with fragile(
         Diagram(
             f"{provider}-{pclassName}",
             show=False,
             outformat="png",
-            filename=f"{provider}/{pclassName}",
+            filename=f"horizontal/{provider}/{pclassName}",
         )
     ):
         with Cluster(pclassName):
             classes = get_classes(
                 importlib.import_module("diagrams." + provider + "." + pclassName)
             )
-            display_icons(classes)
+            display_icons_horizontal(classes)
+
+        raise fragile.Break
+
+
+def print_image_vertical(provider, pclassName):
+    with fragile(
+        Diagram(
+            f"{provider}-{pclassName}",
+            show=False,
+            outformat="png",
+            filename=f"vertical/{provider}/{pclassName}",
+        )
+    ):
+        with Cluster(pclassName):
+            classes = get_classes(
+                importlib.import_module("diagrams." + provider + "." + pclassName)
+            )
+            display_icons_vertical(classes)
 
         raise fragile.Break
 
@@ -114,14 +141,27 @@ def main():
         if module not in ["diagrams.oci.database"]:
             add_module_to_provider_list(providers, module)
 
+    if not check_local_directory("horizontal"):
+        create_dir("horizontal")
+
+    if not check_local_directory("vertical"):
+        create_dir("vertical")
+
     for provider in get_provider_list(providers):
         print(provider)
-        if not check_local_directory(provider):
-            create_dir(provider)
+        if not check_local_directory(f"horizontal/{provider}"):
+            create_dir(f"horizontal/{provider}")
+
+        if not check_local_directory(f"vertical/{provider}"):
+            create_dir(f"vertical/{provider}")
 
         for pclassName in get_provider_classes(providers, provider):
             print(pclassName)
-            print_image(provider, pclassName)
+            print_image_horizontal(provider, pclassName)
+
+        for pclassName in get_provider_classes(providers, provider):
+            print(pclassName)
+            print_image_vertical(provider, pclassName)
 
         print("\n")
 
